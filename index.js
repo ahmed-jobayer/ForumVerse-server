@@ -30,6 +30,7 @@ async function run() {
     // all collections
 
     const userCollection = client.db("ForumVerseDB").collection("users");
+    const announcementsCollection = client.db("ForumVerseDB").collection("announcements");
 
     // user related api
 
@@ -45,6 +46,13 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+
+    // announchment related api
+
+    app.get('/announcements', async(req, res) =>{
+        const result =await announcementsCollection.find().toArray()
+        res.send(result)
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log(
