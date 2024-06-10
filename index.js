@@ -30,7 +30,10 @@ async function run() {
     // all collections
 
     const userCollection = client.db("ForumVerseDB").collection("users");
-    const announcementsCollection = client.db("ForumVerseDB").collection("announcements");
+    const announcementsCollection = client
+      .db("ForumVerseDB")
+      .collection("announcements");
+    const postCollection = client.db("ForumVerseDB").collection("posts");
 
     // user related api
 
@@ -47,12 +50,44 @@ async function run() {
       res.send(result);
     });
 
+    // post related api
+
+    app.get("/posts", async (req, res) => {
+      const sortType = req.query.sort;
+      let result;
+      try {
+        if (sortType === "popularity") {
+          result = await postCollection
+            .aggregate([
+              {
+                $addFields: {
+                  voteDifference: {
+                    $subtract: ["$upVoteCount", "$downVoteCount"],
+                  },
+                },
+              },
+              {
+                $sort: { voteDifference: -1 },
+              },
+            ])
+            .toArray();
+        } else {
+          result = await postCollection.find().sort({ postTime: -1 }).toArray();
+        }
+        //   console.log("Posts result:", result);
+        res.send(result);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
     // announchment related api
 
-    app.get('/announcements', async(req, res) =>{
-        const result =await announcementsCollection.find().toArray()
-        res.send(result)
-    })
+    app.get("/announcements", async (req, res) => {
+      const result = await announcementsCollection.find().toArray();
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
