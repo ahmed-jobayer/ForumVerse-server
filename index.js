@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.oapnwos.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -80,6 +80,42 @@ async function run() {
         console.error("Error fetching posts:", error);
         res.status(500).send("Internal Server Error");
       }
+    });
+
+    app.get("/posts/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      query = { _id: new ObjectId(id) };
+      const result = await postCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.patch("/posts/:id/upvote", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const update = { $inc: { upVoteCount: 1 } };
+      const result = await postCollection.updateOne(query, update);
+      res.send(result);
+    });
+
+    app.patch("/posts/:id/downvote", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const update = { $inc: { downVoteCount: 1 } };
+      const result = await postCollection.updateOne(query, update);
+      res.send(result);
+    });
+
+    app.patch("/posts/:id/comments", async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const newComment = req.body.comment;
+      console.log(newComment)
+      const query = { _id: new ObjectId(id) };
+      const update = { $push: { comments: newComment } };
+      const options = { returnOriginal: false };
+      const result = postCollection.findOneAndUpdate(query, update, options);
+      res.send(result);
     });
 
     // announchment related api
