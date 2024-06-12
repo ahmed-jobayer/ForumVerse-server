@@ -37,6 +37,14 @@ async function run() {
 
     // user related api
 
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      // console.log(email)
+      const query = { email: email };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       // console.log(user)
@@ -82,6 +90,15 @@ async function run() {
       }
     });
 
+    app.get("/posts/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { authorEmail: email };
+      const result = await postCollection.find(query).toArray();
+      console.log(result)
+      res.send(result);
+    });
+
     app.get("/posts/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
@@ -108,9 +125,9 @@ async function run() {
 
     app.patch("/posts/:id/comments", async (req, res) => {
       const id = req.params.id;
-      console.log(id)
+      console.log(id);
       const newComment = req.body.comment;
-      console.log(newComment)
+      console.log(newComment);
       const query = { _id: new ObjectId(id) };
       const update = { $push: { comments: newComment } };
       const options = { returnOriginal: false };
