@@ -90,18 +90,26 @@ async function run() {
       }
     });
 
+    app.post("/posts", async (req, res) => {
+      const post = req.body;
+      const result = await postCollection.insertOne(post);
+      res.send(result);
+      // console.log(post)
+    });
+
     app.get("/posts/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+      // console.log(email);
       const query = { authorEmail: email };
       const result = await postCollection.find(query).toArray();
-      console.log(result)
+      // console.log(result)
       res.send(result);
     });
 
-    app.get("/posts/:id", async (req, res) => {
+    // post according id
+    app.get("/postsDetails/:id", async (req, res) => {
+      // console.log(req.params);
       const id = req.params.id;
-      // console.log(id);
       query = { _id: new ObjectId(id) };
       const result = await postCollection.findOne(query);
       res.send(result);
